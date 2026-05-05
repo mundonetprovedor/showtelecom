@@ -45,7 +45,9 @@ function startGame() {
     const nameInput = document.getElementById('player-name');
     playerName = nameInput.value.trim();
     if (!playerName) {
-        alert("Por favor, digite seu nome para começar!");
+        nameInput.classList.add('shake');
+        setTimeout(() => nameInput.classList.remove('shake'), 500);
+        nameInput.focus();
         return;
     }
 
