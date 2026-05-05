@@ -107,6 +107,7 @@ function loadQuestion() {
     const q = questions[currentQuestionIndex];
     document.getElementById('question-text').innerText = q.question;
     document.getElementById('current-question-num').innerText = currentQuestionIndex + 1;
+    document.getElementById('total-questions-num').innerText = questions.length;
     
     updatePrizes();
 
