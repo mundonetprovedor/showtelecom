@@ -96,27 +96,47 @@ function loadQuestion() {
     optionsContainer.innerHTML = '';
     const letters = ['A', 'B', 'C', 'D'];
     
-    q.options.forEach((optText, index) => {
+    // Criar uma cópia das opções com seus estados originais para embaralhar
+    const optionsWithStates = q.options.map((text, index) => ({
+        text,
+        isCorrect: index === q.answer
+    }));
+
+    // Embaralhar as opções
+    optionsWithStates.sort(() => Math.random() - 0.5);
+
+    optionsWithStates.forEach((opt, index) => {
         const div = document.createElement('div');
         div.className = 'option';
         div.dataset.index = index;
         div.innerHTML = `
             <span class="letter">${letters[index]}</span>
-            <span class="text">${optText}</span>
+            <span class="text">${opt.text}</span>
             <button class="confirm-btn">Confirmar</button>
         `;
         
-        div.addEventListener('click', () => selectOption(div));
+        // Atribuir o novo índice correto para a lógica de verificação
+        if (opt.isCorrect) {
+            currentCorrectAnswerIndex = index;
+        }
+
+        div.onclick = (e) => {
+            if (e.target.className !== 'confirm-btn') {
+                selectOption(div);
+            }
+        };
         
         const confirmBtn = div.querySelector('.confirm-btn');
-        confirmBtn.addEventListener('click', (e) => {
+        confirmBtn.onclick = (e) => {
             e.stopPropagation();
             confirmAnswer(index, div);
-        });
+        };
 
         optionsContainer.appendChild(div);
     });
 }
+
+let currentCorrectAnswerIndex = 0; // Rastreia a resposta correta após o embaralhamento
 
 function updatePrizes() {
     const errarIndex = Math.max(0, currentQuestionIndex - 1); // Se errar, cai para o prêmio anterior ou 0
@@ -160,7 +180,7 @@ function confirmAnswer(index, element) {
     if (audioWaiting) audioWaiting.play();
     setHostExpression('nervous');
 
-    const correctAnswer = questions[currentQuestionIndex].answer;
+    const correctAnswer = currentCorrectAnswerIndex;
     
     // Simula o "Está certo disso?" com um delay de suspense
     setTimeout(() => {
@@ -212,7 +232,7 @@ function useCards() {
     
     audioCards.play();
     
-    const correctAnswer = questions[currentQuestionIndex].answer;
+    const correctAnswer = currentCorrectAnswerIndex;
     const optionsList = Array.from(document.querySelectorAll('.option'));
     
     // Filtra as opções incorretas
