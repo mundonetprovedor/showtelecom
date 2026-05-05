@@ -5,6 +5,7 @@ let selectedOption = null;
 let isAnswerLocked = false;
 let timerInterval = null;
 let timeLeft = 20;
+let playerName = "";
 
 const startScreen = document.getElementById('start-screen');
 const gameScreen = document.getElementById('game-screen');
@@ -41,6 +42,13 @@ function setHostExpression(expression) {
 btnStart.addEventListener('click', startGame);
 
 function startGame() {
+    const nameInput = document.getElementById('player-name');
+    playerName = nameInput.value.trim();
+    if (!playerName) {
+        alert("Por favor, digite seu nome para começar!");
+        return;
+    }
+
     startScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
     try {
@@ -320,6 +328,22 @@ function endGame(win) {
     
     document.getElementById('end-title').innerText = title;
     document.getElementById('end-prize').innerText = finalPrize;
+
+    // Salvar pontuação no servidor
+    savePlayerScore(playerName, finalPrize, title);
+}
+
+function savePlayerScore(name, prize, result) {
+    fetch('/api/save-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            name, 
+            prize, 
+            result, 
+            date: new Date().toLocaleString('pt-BR') 
+        })
+    }).catch(err => console.error("Erro ao salvar pontuação:", err));
 }
 
 function startTimer() {

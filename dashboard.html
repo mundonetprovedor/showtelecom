@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Resultados - Show do Telecom</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #020024;
+            color: white;
+            padding: 40px;
+            font-family: 'Inter', sans-serif;
+            overflow-y: auto;
+            height: auto;
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.05);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+        h1 { 
+            color: var(--primary); 
+            text-align: center; 
+            margin-bottom: 40px; 
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .score-table th, .score-table td {
+            padding: 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .score-table th {
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        .score-table tr:hover {
+            background: rgba(255,215,0,0.05);
+        }
+        .result-tag {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .tag-win { background: var(--success); color: white; }
+        .tag-wrong { background: var(--danger); color: white; }
+        .tag-stop { background: #555; color: white; }
+        
+        #login-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #020024;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .login-box {
+            background: rgba(255,255,255,0.05);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--primary);
+            text-align: center;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="login-screen">
+        <div class="login-box">
+            <h1 style="font-size: 1.5rem;">Acesso Restrito</h1>
+            <div class="input-group">
+                <input type="password" id="dash-pass" placeholder="Senha de Acesso">
+            </div>
+            <button class="btn-primary" onclick="checkAccess()">Entrar</button>
+        </div>
+    </div>
+
+    <div id="dashboard-content" class="dashboard-container hidden">
+        <h1>Relatório de Participantes</h1>
+        
+        <table class="score-table">
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Participante</th>
+                    <th>Resultado</th>
+                    <th>Prêmio Final</th>
+                </tr>
+            </thead>
+            <tbody id="scores-body">
+                <!-- Scores will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function checkAccess() {
+            const pass = document.getElementById('dash-pass').value;
+            if (pass === 'admin123') { // Senha simples solicitada pelo user
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard-content').classList.remove('hidden');
+                loadScores();
+            } else {
+                alert("Senha incorreta!");
+            }
+        }
+
+        async function loadScores() {
+            try {
+                const response = await fetch('/api/scores');
+                const scores = await response.json();
+                const body = document.getElementById('scores-body');
+                
+                body.innerHTML = scores.reverse().map(s => `
+                    <tr>
+                        <td style="opacity: 0.6; font-size: 0.9rem;">${s.date || '-'}</td>
+                        <td style="font-weight: bold; font-size: 1.1rem;">${s.name}</td>
+                        <td><span class="result-tag ${getTagClass(s.result)}">${s.result}</span></td>
+                        <td style="color: var(--primary); font-weight: bold;">${s.prize}</td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error("Erro ao carregar scores", err);
+            }
+        }
+
+        function getTagClass(result) {
+            if (result.includes('VENCEU')) return 'tag-win';
+            if (result.includes('ERROU') || result.includes('Acabou')) return 'tag-wrong';
+            return 'tag-stop';
+        }
+    </script>
+</body>
+</html>

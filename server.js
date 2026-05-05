@@ -20,6 +20,38 @@ app.get('/api/questions', (req, res) => {
     }
 });
 
+// Endpoint para salvar a pontuação do jogador
+app.post('/api/save-score', (req, res) => {
+    const scoreData = req.body;
+    const scoresFile = path.join(__dirname, 'scores.json');
+    
+    let scores = [];
+    if (fs.existsSync(scoresFile)) {
+        try {
+            scores = JSON.parse(fs.readFileSync(scoresFile, 'utf8'));
+        } catch (e) { scores = []; }
+    }
+    
+    scores.push(scoreData);
+    
+    try {
+        fs.writeFileSync(scoresFile, JSON.stringify(scores, null, 4));
+        res.send('Pontuação salva!');
+    } catch (err) {
+        res.status(500).send('Erro ao salvar pontuação');
+    }
+});
+
+// Endpoint para ler as pontuações (Dashboard)
+app.get('/api/scores', (req, res) => {
+    const scoresFile = path.join(__dirname, 'scores.json');
+    if (fs.existsSync(scoresFile)) {
+        res.sendFile(scoresFile);
+    } else {
+        res.json([]);
+    }
+});
+
 // Endpoint para salvar as perguntas
 app.post('/api/save-questions', (req, res) => {
     const { questions, gameConfig } = req.body;
