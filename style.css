@@ -288,8 +288,9 @@ body {
 }
 
 .confirm-btn:hover {
-    background: var(--primary);
-    color: var(--bg-dark);
+    background: var(--success);
+    color: white;
+    border-color: white;
 }
 
 .option.selected .confirm-btn {
