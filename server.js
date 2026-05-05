@@ -70,6 +70,26 @@ const questions = ${JSON.stringify(questions, null, 4)};`;
     }
 });
 
+const { exec } = require('child_process');
+
+// Endpoint para sincronizar mudanças com o Git
+app.post('/api/git-sync', (req, res) => {
+    console.log("Iniciando sincronização com Git...");
+    
+    // Comando para adicionar, commitar e subir as mudanças
+    // Usamos --allow-empty para não dar erro se não houver mudanças reais
+    const command = 'git add questions.js scores.json && git commit -m "Admin: atualização de perguntas e scores [skip ci]" && git push';
+    
+    exec(command, (err, stdout, stderr) => {
+        if (err) {
+            console.error("Erro no Git:", stderr);
+            return res.status(500).send('Erro ao sincronizar com Git: ' + stderr);
+        }
+        console.log("Git Sync Sucesso:", stdout);
+        res.send('Sincronizado com o GitHub com sucesso!');
+    });
+});
+
 app.listen(port, '0.0.0.0', () => {
     console.log(`Show do Telecom rodando na porta: ${port}`);
 });

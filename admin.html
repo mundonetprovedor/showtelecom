@@ -83,7 +83,10 @@
     <div class="admin-container">
         <h1>
             Painel Administrativo
-            <button class="btn-save">SALVAR ALTERAÇÕES</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-save" style="background: #007bff;" onclick="syncGit()">☁️ SINCRONIZAR COM GITHUB</button>
+                <button class="btn-save">SALVAR ALTERAÇÕES</button>
+            </div>
         </h1>
         
         <div id="questions-list">
@@ -183,6 +186,29 @@
                 console.error("Erro na requisição:", err);
                 statusMsg.style.color = "red";
                 statusMsg.innerText = "Erro ao salvar: Verifique a conexão com o servidor.";
+            }
+        }
+
+        async function syncGit() {
+            if (!confirm("Isso enviará as mudanças atuais para o GitHub. Deseja continuar?")) return;
+            
+            const statusMsg = document.getElementById('status-msg');
+            statusMsg.innerText = "Sincronizando com GitHub... Aguarde.";
+            statusMsg.style.color = "cyan";
+
+            try {
+                const response = await fetch('/api/git-sync', { method: 'POST' });
+                const text = await response.text();
+                
+                if (response.ok) {
+                    statusMsg.style.color = "#28a745";
+                    statusMsg.innerText = "✅ " + text;
+                } else {
+                    throw new Error(text);
+                }
+            } catch (err) {
+                statusMsg.style.color = "red";
+                statusMsg.innerText = "❌ " + err.message;
             }
         }
 
