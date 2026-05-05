@@ -37,7 +37,9 @@ btnStart.addEventListener('click', startGame);
 function startGame() {
     startScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
-    audioStart.play();
+    try {
+        audioStart.play();
+    } catch (e) {}
     
     currentQuestionIndex = 0;
     skipsLeft = 3;
@@ -58,10 +60,14 @@ function loadQuestion() {
 
     isAnswerLocked = false;
     selectedOption = null;
-    audioGong.play();
-    audioBackground.play();
-    audioWaiting.pause();
-    audioWaiting.currentTime = 0;
+    try {
+        audioGong.play();
+        audioBackground.play();
+        audioWaiting.pause();
+        audioWaiting.currentTime = 0;
+    } catch (e) {
+        console.log("Autoplay prevented or audio error", e);
+    }
     setHostExpression('thinking');
     startTimer();
 
@@ -120,9 +126,11 @@ function selectOption(element) {
     selectedOption = element;
 
     // Toca o "Está certo disso?" ao selecionar
-    speechDisso.pause();
-    speechDisso.currentTime = 0;
-    speechDisso.play();
+    try {
+        speechDisso.pause();
+        speechDisso.currentTime = 0;
+        speechDisso.play();
+    } catch (e) {}
 }
 
 function confirmAnswer(index, element) {
