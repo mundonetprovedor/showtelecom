@@ -7,6 +7,11 @@ WORKDIR /app
 # Copia os arquivos de dependências
 COPY package*.json ./
 
+# Instala o git e configura a identidade
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+RUN git config --global user.email "suporte@mundonetbandalarga.com.br"
+RUN git config --global user.name "MundoNet Admin"
+
 # Instala as dependências
 RUN npm install
 
