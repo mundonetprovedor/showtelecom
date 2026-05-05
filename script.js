@@ -20,7 +20,9 @@ const audioWrong = document.getElementById('audio-wrong');
 const audioCorrect = document.getElementById('audio-correct');
 const audioGong = document.getElementById('audio-gong');
 const audioCards = document.getElementById('audio-cards');
-const audioBackground = document.getElementById('audio-background');
+const audioBackground1 = document.getElementById('audio-background-1');
+const audioBackground2 = document.getElementById('audio-background-2');
+let currentBackgroundMusic = audioBackground1;
 const audioWaiting = document.getElementById('audio-waiting');
 const speechCerta = document.getElementById('speech-certa');
 const speechDisso = document.getElementById('speech-disso');
@@ -62,9 +64,23 @@ function loadQuestion() {
     selectedOption = null;
     try {
         audioGong.play();
-        audioBackground.play();
-        audioWaiting.pause();
-        audioWaiting.currentTime = 0;
+        
+        // Alterna música a cada 3 perguntas
+        if (audioBackground1) audioBackground1.pause();
+        if (audioBackground2) audioBackground2.pause();
+        
+        if (Math.floor(currentQuestionIndex / 3) % 2 === 0) {
+            currentBackgroundMusic = audioBackground1;
+        } else {
+            currentBackgroundMusic = audioBackground2;
+        }
+        
+        if (currentBackgroundMusic) currentBackgroundMusic.play();
+        
+        if (audioWaiting) {
+            audioWaiting.pause();
+            audioWaiting.currentTime = 0;
+        }
     } catch (e) {
         console.log("Autoplay prevented or audio error", e);
     }
@@ -140,8 +156,8 @@ function confirmAnswer(index, element) {
     element.classList.remove('selected');
 
     // Pausa a música de fundo e inicia o suspense
-    audioBackground.pause();
-    audioWaiting.play();
+    if (currentBackgroundMusic) currentBackgroundMusic.pause();
+    if (audioWaiting) audioWaiting.play();
     setHostExpression('nervous');
 
     const correctAnswer = questions[currentQuestionIndex].answer;
@@ -223,9 +239,9 @@ function stopGame() {
 }
 
 function endGame(win) {
-    audioBackground.pause();
-    audioBackground.currentTime = 0;
-    audioWaiting.pause();
+    if (audioBackground1) audioBackground1.pause();
+    if (audioBackground2) audioBackground2.pause();
+    if (audioWaiting) audioWaiting.pause();
     audioWaiting.currentTime = 0;
 
     gameScreen.classList.add('hidden');
@@ -284,7 +300,7 @@ function stopTimer() {
 
 function timeOut() {
     isAnswerLocked = true;
-    audioBackground.pause();
+    if (currentBackgroundMusic) currentBackgroundMusic.pause();
     speechTempo.play(); // Silvio Santos: "O seu tempo acabou!"
     
     setTimeout(() => {
