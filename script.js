@@ -178,21 +178,33 @@ function confirmAnswer(index, element) {
     element.classList.remove('selected');
 
     // Pausa a música de fundo e inicia o suspense
-    if (currentBackgroundMusic) currentBackgroundMusic.pause();
-    if (audioWaiting) audioWaiting.play();
+    try {
+        if (currentBackgroundMusic) currentBackgroundMusic.pause();
+        if (audioWaiting) audioWaiting.play();
+    } catch (e) {
+        console.log("Audio suspense play prevented", e);
+    }
+    
     setHostExpression('nervous');
 
     const correctAnswer = currentCorrectAnswerIndex;
     
     // Simula o "Está certo disso?" com um delay de suspense
     setTimeout(() => {
-        audioWaiting.pause();
-        audioWaiting.currentTime = 0;
+        try {
+            if (audioWaiting) {
+                audioWaiting.pause();
+                audioWaiting.currentTime = 0;
+            }
+        } catch (e) {}
 
         if (index === correctAnswer) {
             element.classList.add('correct');
-            audioCorrect.play();
-            speechCerta.play(); // Silvio Santos: "Certa resposta!"
+            try {
+                audioCorrect.play();
+                speechCerta.play(); // Silvio Santos: "Certa resposta!"
+            } catch (e) {}
+            
             setHostExpression('happy');
             setTimeout(() => {
                 currentQuestionIndex++;
@@ -200,17 +212,20 @@ function confirmAnswer(index, element) {
             }, 3000);
         } else {
             element.classList.add('wrong');
-            speechErrada.play(); // Silvio Santos: "Resposta errada!"
+            try {
+                speechErrada.play(); // Silvio Santos: "Resposta errada!"
+                audioWrong.play();
+            } catch (e) {}
+            
             setHostExpression('sad');
             const correctElement = document.querySelector(`.option[data-index="${correctAnswer}"]`);
             if(correctElement) correctElement.classList.add('correct');
             
-            audioWrong.play();
             setTimeout(() => {
                 endGame(false);
             }, 3000);
         }
-    }, 4000); // 4 segundos de suspense
+    }, 3000); // 3 segundos de suspense (reduzido de 4)
 }
 
 function useSkip() {
