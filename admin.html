@@ -92,8 +92,13 @@
         <div id="questions-list">
             <!-- Perguntas serão carregadas aqui -->
         </div>
-
-        <button class="btn-add" onclick="addQuestion()">+ ADICIONAR PERGUNTA</button>
+        <div class="actions-bar" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+            <button class="btn-add" onclick="addQuestion()" style="background: var(--success);">+ Nova Pergunta</button>
+            <button class="btn-delete" onclick="deleteSelected()" style="background: var(--danger); font-size: 0.9rem; position: static;">🗑️ Excluir Selecionados</button>
+            <label style="color: white; font-size: 0.9rem; cursor: pointer; margin-left: 10px;">
+                <input type="checkbox" id="select-all" onclick="toggleSelectAll(this.checked)"> Selecionar Tudo
+            </label>
+        </div>
         
         <div id="status-msg" class="status"></div>
     </div>
@@ -110,8 +115,11 @@
                 const card = document.createElement('div');
                 card.className = 'question-card';
                 card.innerHTML = `
+                    <div style="position: absolute; top: 15px; left: 15px;">
+                        <input type="checkbox" class="q-checkbox" data-index="${qIndex}" style="width: 20px; height: 20px; cursor: pointer;">
+                    </div>
                     <button class="btn-delete" onclick="deleteQuestion(${qIndex})">Excluir</button>
-                    <label>Pergunta ${qIndex + 1}:</label>
+                    <label style="margin-left: 25px;">Pergunta ${qIndex + 1}:</label>
                     <input type="text" value="${q.question}" onchange="updateQuestion(${qIndex}, 'question', this.value)">
                     
                     <div class="options-grid">
@@ -153,10 +161,27 @@
         }
 
         function deleteQuestion(index) {
-            if (confirm('Deseja excluir esta pergunta?')) {
-                questions.splice(index, 1);
-                renderQuestions();
+            questions.splice(index, 1);
+            renderQuestions();
+        }
+
+        function toggleSelectAll(checked) {
+            document.querySelectorAll('.q-checkbox').forEach(cb => cb.checked = checked);
+        }
+
+        function deleteSelected() {
+            const selectedIndices = Array.from(document.querySelectorAll('.q-checkbox:checked'))
+                .map(cb => parseInt(cb.dataset.index))
+                .sort((a, b) => b - a); // Sort descending to splice correctly
+            
+            if (selectedIndices.length === 0) {
+                alert("Nenhuma pergunta selecionada!");
+                return;
             }
+
+            selectedIndices.forEach(idx => questions.splice(idx, 1));
+            document.getElementById('select-all').checked = false;
+            renderQuestions();
         }
 
         // Adiciona o listener de forma robusta
