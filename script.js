@@ -28,6 +28,8 @@ const speechCerta = document.getElementById('speech-certa');
 const speechDisso = document.getElementById('speech-disso');
 const speechErrada = document.getElementById('speech-errada');
 const speechTempo = document.getElementById('speech-tempo');
+const audioWinAll = document.getElementById('audio-win-all');
+const celebrationBox = document.getElementById('celebration-box');
 
 let audioCtx = null; // Instanciado sob demanda para evitar bloqueios de autoplay
 
@@ -280,6 +282,8 @@ function endGame(win) {
     if (audioBackground2) audioBackground2.pause();
     if (audioWaiting) audioWaiting.pause();
     audioWaiting.currentTime = 0;
+    
+    if (celebrationBox) celebrationBox.classList.add('hidden');
 
     gameScreen.classList.add('hidden');
     endScreen.classList.remove('hidden');
@@ -291,6 +295,10 @@ function endGame(win) {
         title = "VOCÊ VENCEU!";
         finalPrize = gameConfig.prizes[gameConfig.prizes.length - 1];
         setHostExpression('happy');
+        try {
+            if (audioWinAll) audioWinAll.play();
+            if (celebrationBox) celebrationBox.classList.remove('hidden');
+        } catch (e) {}
     } else if (win === false) {
         title = "QUE PENA, VOCÊ ERROU!";
         const errarIndex = Math.max(0, currentQuestionIndex - 1);
