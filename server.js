@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
 
 app.use(express.json());
 app.use(express.static(__dirname));
@@ -39,6 +39,5 @@ const questions = ${JSON.stringify(questions, null, 4)};`;
 });
 
 app.listen(port, '0.0.0.0', () => {
-    console.log(`Show do Telecom rodando em: http://localhost:${port}`);
-    console.log(`Acesse na rede local em: http://192.168.1.84:${port}`);
+    console.log(`Show do Telecom rodando na porta: ${port}`);
 });
