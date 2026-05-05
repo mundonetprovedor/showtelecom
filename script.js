@@ -270,25 +270,63 @@ function endGame(win) {
 }
 
 function startTimer() {
-    stopTimer();
+    clearInterval(timerInterval);
     timeLeft = 20;
-    const timerText = document.getElementById('timer-text');
-    timerText.innerText = timeLeft;
-    timerText.classList.remove('timer-low');
+    updateTimerDisplay();
 
     timerInterval = setInterval(() => {
         timeLeft--;
-        timerText.innerText = timeLeft;
+        updateTimerDisplay();
+        
+        // Efeito sonoro de "Tic" e tensão
+        playTickSound();
 
+        const timerText = document.getElementById('timer-text');
         if (timeLeft <= 5) {
             timerText.classList.add('timer-low');
+        } else {
+            timerText.classList.remove('timer-low');
         }
 
         if (timeLeft <= 0) {
-            stopTimer();
+            clearInterval(timerInterval);
             timeOut();
         }
     }, 1000);
+}
+
+// Função para gerar um som de "Tic" eletrônico (mais tensão conforme o tempo acaba)
+function playTickSound() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.type = 'sine';
+        
+        // Aumenta a frequência (tom) conforme o tempo acaba para dar mais tensão
+        const frequency = timeLeft <= 5 ? 800 : 400;
+        oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
+        
+        // Fecha o contexto após o som para não acumular processos
+        setTimeout(() => audioCtx.close(), 200);
+    } catch (e) {
+        console.log("Erro ao gerar som de tick", e);
+    }
+}
+
+function updateTimerDisplay() {
+    const timerText = document.getElementById('timer-text');
+    if (timerText) timerText.innerText = timeLeft;
 }
 
 function stopTimer() {
