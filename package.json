@@ -1,5 +1,14 @@
 {
+  "name": "show-do-telecom",
+  "version": "1.0.0",
+  "description": "Show do Milhão style quiz for ISP training",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
-    "express": "^5.2.1"
-  }
+    "express": "^4.18.2"
+  },
+  "author": "MundoNet",
+  "license": "ISC"
 }
