@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Show do Telecom</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #020024;
+            color: white;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            overflow-y: auto;
+        }
+        .admin-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.05);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--primary);
+        }
+        h1 { color: var(--primary); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .question-card {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border-left: 5px solid var(--primary);
+            position: relative;
+        }
+        .question-card input, .question-card select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: #111;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 5px;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .btn-save {
+            background: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .btn-add {
+            background: var(--primary);
+            color: #000;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .status { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <h1>
+            Painel Administrativo
+            <button class="btn-save" onclick="saveData()">SALVAR ALTERAÇÕES</button>
+        </h1>
+        
+        <div id="questions-list">
+            <!-- Perguntas serão carregadas aqui -->
+        </div>
+
+        <button class="btn-add" onclick="addQuestion()">+ ADICIONAR PERGUNTA</button>
+        
+        <div id="status-msg" class="status"></div>
+    </div>
+
+    <!-- Script para carregar a configuração inicial -->
+    <script src="questions.js"></script>
+    <script>
+        const listContainer = document.getElementById('questions-list');
+        const statusMsg = document.getElementById('status-msg');
+
+        function renderQuestions() {
+            listContainer.innerHTML = '';
+            questions.forEach((q, qIndex) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.innerHTML = `
+                    <button class="btn-delete" onclick="deleteQuestion(${qIndex})">Excluir</button>
+                    <label>Pergunta ${qIndex + 1}:</label>
+                    <input type="text" value="${q.question}" onchange="updateQuestion(${qIndex}, 'question', this.value)">
+                    
+                    <div class="options-grid">
+                        ${q.options.map((opt, oIndex) => `
+                            <div>
+                                <label>Opção ${String.fromCharCode(65 + oIndex)}:</label>
+                                <input type="text" value="${opt}" onchange="updateOption(${qIndex}, ${oIndex}, this.value)">
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <label>Resposta Correta:</label>
+                    <select onchange="updateQuestion(${qIndex}, 'answer', parseInt(this.value))">
+                        <option value="0" ${q.answer === 0 ? 'selected' : ''}>A</option>
+                        <option value="1" ${q.answer === 1 ? 'selected' : ''}>B</option>
+                        <option value="2" ${q.answer === 2 ? 'selected' : ''}>C</option>
+                        <option value="3" ${q.answer === 3 ? 'selected' : ''}>D</option>
+                    </select>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function updateQuestion(qIndex, field, value) {
+            questions[qIndex][field] = value;
+        }
+
+        function updateOption(qIndex, oIndex, value) {
+            questions[qIndex].options[oIndex] = value;
+        }
+
+        function addQuestion() {
+            questions.push({
+                question: "Nova Pergunta?",
+                options: ["Opção A", "Opção B", "Opção C", "Opção D"],
+                answer: 0
+            });
+            renderQuestions();
+        }
+
+        function deleteQuestion(index) {
+            if (confirm('Deseja excluir esta pergunta?')) {
+                questions.splice(index, 1);
+                renderQuestions();
+            }
+        }
+
+        async function saveData() {
+            statusMsg.innerText = "Salvando...";
+            try {
+                const response = await fetch('/api/save-questions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ questions, gameConfig })
+                });
+                
+                if (response.ok) {
+                    statusMsg.style.color = "#28a745";
+                    statusMsg.innerText = "Salvo com sucesso! Reinicie o servidor para garantir a atualização.";
+                } else {
+                    throw new Error('Erro ao salvar');
+                }
+            } catch (err) {
+                statusMsg.style.color = "red";
+                statusMsg.innerText = "Erro ao salvar: Verifique se o servidor Node está rodando.";
+            }
+        }
+
+        // Inicializa
+        renderQuestions();
+    </script>
+</body>
+</html>
