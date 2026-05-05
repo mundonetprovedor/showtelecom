@@ -13,8 +13,11 @@ RUN npm install
 # Copia o restante dos arquivos do projeto
 COPY . .
 
-# Expõe a porta que o servidor usa
+# Força a porta 8080 para evitar problemas de permissão com a porta 80
+ENV PORT=8080
+
+# Expõe a porta
 EXPOSE 8080
 
-# Comando para iniciar o servidor
-CMD ["npm", "start"]
+# Comando para iniciar o servidor (direto com node para melhor performance e logs)
+CMD ["node", "server.js"]
