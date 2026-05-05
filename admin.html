@@ -83,7 +83,7 @@
     <div class="admin-container">
         <h1>
             Painel Administrativo
-            <button class="btn-save" onclick="saveData()">SALVAR ALTERAÇÕES</button>
+            <button class="btn-save">SALVAR ALTERAÇÕES</button>
         </h1>
         
         <div id="questions-list">
@@ -156,8 +156,14 @@
             }
         }
 
+        // Adiciona o listener de forma robusta
+        document.querySelector('.btn-save').addEventListener('click', saveData);
+
         async function saveData() {
+            console.log("Tentando salvar questões...", questions);
             statusMsg.innerText = "Salvando...";
+            statusMsg.style.color = "white";
+
             try {
                 const response = await fetch('/api/save-questions', {
                     method: 'POST',
@@ -166,14 +172,17 @@
                 });
                 
                 if (response.ok) {
+                    console.log("Resposta do servidor OK");
                     statusMsg.style.color = "#28a745";
-                    statusMsg.innerText = "Salvo com sucesso! Reinicie o servidor para garantir a atualização.";
+                    statusMsg.innerText = "Salvo com sucesso! Atualize a página do jogo para ver as mudanças.";
                 } else {
-                    throw new Error('Erro ao salvar');
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Erro ao salvar');
                 }
             } catch (err) {
+                console.error("Erro na requisição:", err);
                 statusMsg.style.color = "red";
-                statusMsg.innerText = "Erro ao salvar: Verifique se o servidor Node está rodando.";
+                statusMsg.innerText = "Erro ao salvar: Verifique a conexão com o servidor.";
             }
         }
 
