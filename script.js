@@ -296,6 +296,11 @@ function endGame(win) {
         const errarIndex = Math.max(0, currentQuestionIndex - 1);
         finalPrize = currentQuestionIndex === 0 ? "0 PONTOS" : gameConfig.prizes[errarIndex];
         setHostExpression('sad');
+    } else if (win === 'timeout') {
+        title = "QUE PENA, Seu Tempo Acabou!";
+        const errarIndex = Math.max(0, currentQuestionIndex - 1);
+        finalPrize = currentQuestionIndex === 0 ? "0 PONTOS" : gameConfig.prizes[errarIndex];
+        setHostExpression('sad');
     } else {
         title = "VOCÊ PAROU!";
         finalPrize = currentQuestionIndex === 0 ? "0 PONTOS" : gameConfig.prizes[currentQuestionIndex - 1];
@@ -387,6 +392,6 @@ function timeOut() {
     }
     
     setTimeout(() => {
-        endGame(false); // Considera como erro se o tempo acabar
+        endGame('timeout'); // Considera como timeout se o tempo acabar
     }, 4000); // Dá tempo do áudio do Silvio terminar
 }
