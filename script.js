@@ -103,9 +103,13 @@ function updatePrizes() {
     const pararPrize = currentQuestionIndex === 0 ? "0 PONTOS" : gameConfig.prizes[currentQuestionIndex - 1];
     const acertarPrize = gameConfig.prizes[currentQuestionIndex];
 
-    document.getElementById('prize-errar').innerText = errarPrize;
-    document.getElementById('prize-parar').innerText = pararPrize;
-    document.getElementById('prize-acertar').innerText = acertarPrize;
+    const prizeErrar = document.getElementById('prize-errar');
+    const prizeParar = document.getElementById('prize-parar');
+    const prizeAcertar = document.getElementById('prize-acertar');
+
+    if (prizeErrar) prizeErrar.innerText = errarPrize;
+    if (prizeParar) prizeParar.innerText = pararPrize;
+    if (prizeAcertar) prizeAcertar.innerText = acertarPrize;
 }
 
 function selectOption(element) {
