@@ -76,9 +76,15 @@ const { exec } = require('child_process');
 app.post('/api/git-sync', (req, res) => {
     console.log("Iniciando sincronização com Git...");
     
-    // Comando para adicionar, commitar e subir as mudanças
-    // Usamos --allow-empty para não dar erro se não houver mudanças reais
-    const command = 'git add questions.js scores.json && git commit -m "Admin: atualização de perguntas e scores [skip ci]" && git push';
+    const GITHUB_TOKEN = process.env.GIT_TOKEN;
+    if (!GITHUB_TOKEN) {
+        return res.status(500).send('Erro: Variável GIT_TOKEN não configurada no servidor.');
+    }
+
+    const REPO_URL = `https://${GITHUB_TOKEN}@github.com/mundonetprovedor/showtelecom.git`;
+
+    // Configura a URL com token e faz o push
+    const command = `git remote set-url origin ${REPO_URL} && git add questions.js scores.json && git commit -m "Admin: atualização de perguntas e scores [skip ci]" && git push origin main`;
     
     exec(command, (err, stdout, stderr) => {
         if (err) {
