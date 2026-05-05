@@ -47,6 +47,9 @@ function startGame() {
         audioStart.play();
     } catch (e) {}
     
+    // Embaralha as perguntas aleatoriamente
+    questions.sort(() => Math.random() - 0.5);
+
     currentQuestionIndex = 0;
     skipsLeft = 3;
     cardsUsed = false;
