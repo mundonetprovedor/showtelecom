@@ -29,6 +29,8 @@ const speechDisso = document.getElementById('speech-disso');
 const speechErrada = document.getElementById('speech-errada');
 const speechTempo = document.getElementById('speech-tempo');
 
+let audioCtx = null; // Instanciado sob demanda para evitar bloqueios de autoplay
+
 function setHostExpression(expression) {
     const avatar = document.getElementById('host-avatar');
     if (avatar) avatar.className = 'host-' + expression;
@@ -316,9 +318,16 @@ function startTimer() {
 }
 
 // Função para gerar um som de "Tic" eletrônico (mais tensão conforme o tempo acaba)
-function playTickSound() {
+async function playTickSound() {
     try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        if (audioCtx.state === 'suspended') {
+            await audioCtx.resume();
+        }
+
         const oscillator = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
 
@@ -328,7 +337,7 @@ function playTickSound() {
         const frequency = timeLeft <= 5 ? 800 : 400;
         oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
 
-        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
 
         oscillator.connect(gainNode);
@@ -336,11 +345,8 @@ function playTickSound() {
 
         oscillator.start();
         oscillator.stop(audioCtx.currentTime + 0.1);
-        
-        // Fecha o contexto após o som para não acumular processos
-        setTimeout(() => audioCtx.close(), 200);
     } catch (e) {
-        console.log("Erro ao gerar som de tick", e);
+        console.error("Erro ao gerar som de tick", e);
     }
 }
 
@@ -358,10 +364,14 @@ function stopTimer() {
 
 function timeOut() {
     isAnswerLocked = true;
-    if (currentBackgroundMusic) currentBackgroundMusic.pause();
-    speechTempo.play(); // Silvio Santos: "O seu tempo acabou!"
+    try {
+        if (currentBackgroundMusic) currentBackgroundMusic.pause();
+        speechTempo.play(); // Silvio Santos: "O seu tempo acabou!"
+    } catch (e) {
+        console.error("Erro ao tocar áudio de tempo esgotado", e);
+    }
     
     setTimeout(() => {
         endGame(false); // Considera como erro se o tempo acabar
-    }, 3000);
+    }, 4000); // Dá tempo do áudio do Silvio terminar
 }
